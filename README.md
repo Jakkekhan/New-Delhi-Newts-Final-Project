@@ -1,5 +1,5 @@
 # New-Delhi-Newts-Final-Project
-Download and run New Delhi Newts Final Project.py python script in IDE. The program will prompt the user to input file path (jpeg file type) for image to be analyzed. The image used in our demo can be found in the GitHub. This image should be downloaded by the user. User inputs the file path and presses ENTER. The appropriate location will display on the users desktop and the location name will display on the console.
+Download and run New Delhi Newts Final Project.py python script in IDE. The program will prompt the user to input file path (jpg/png file type) for image to be analyzed. The images used in our demo can be found in the GitHub. This image should be downloaded by the user. User inputs the file path and presses ENTER. The appropriate location will display on the users desktop and the location name will display on the console.
 
 ## Packages
 Make sure to download the following packages: Open CV, Tesseract OCR, BeautifulSoup
