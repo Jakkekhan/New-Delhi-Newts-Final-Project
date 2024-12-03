@@ -26,7 +26,14 @@ Follow the link to download the package: https://github.com/UB-Mannheim/tesserac
 
 pip install beautifulsoup4
 
+This should install beautifulsoup on your computer.
+
+## Troubleshooting
+
+Ensure that packages are all installed in the same environment as the one you are using python in.
+To check what environment you are using in spyder, go to Tools > Preferences > Python Interpreter
+
 ## Other Notes
-Make sure image type being used is jpeg
+Make sure image type being used is JPG or PNG
 
 
