@@ -1,5 +1,8 @@
-#C:\Users\khanj\OneDrive\Desktop\New folder\PMA.jpg
-#C:\Users\khanj\OneDrive\Desktop\New folder\EER.jpg
+# C:\Users\khanj\OneDrive\Desktop\New folder\PMA.jpg
+# C:\Users\khanj\OneDrive\Desktop\New folder\EER.jpg
+# S:\ME 369P Programming\FInal Project\eer.png
+# S:\ME 369P Programming\FInal Project\pma.jpg
+
 
 import cv2
 import pytesseract
