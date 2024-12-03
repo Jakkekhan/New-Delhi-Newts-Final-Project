@@ -1,3 +1,6 @@
+#C:\Users\khanj\OneDrive\Desktop\New folder\PMA.jpg
+#C:\Users\khanj\OneDrive\Desktop\New folder\EER.jpg
+
 import cv2
 import pytesseract
 import requests
@@ -6,16 +9,13 @@ import webbrowser
 import tempfile
 import re
 
-#Image Path (for demo purposes)
-#C:\Users\khanj\OneDrive\Desktop\New folder\PMA.jpg
-
-# Set the path to the Tesseract executable if it's not in your PATH environment variable
+# Set the path to the Tesseract executable
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
 
-#Base URL for UTexas
+# Base URL for UT Austin
 base_url = "https://utdirect.utexas.edu"
 
-#URL of Buildings
+# URL of Buildings
 url = f"{base_url}/apps/campus/buildings/nlogon/facilities/"
 
 # Fetch the main webpage content
@@ -30,7 +30,6 @@ table_body = soup.find('tbody')
 
 # Extract building links and names
 for row in table_body.find_all('tr'):
-    # Extract the acronym (from <th>) and building name (from the first <td>)
     header_cell = row.find('th')
     cells = row.find_all('td')
     if header_cell and len(cells) >= 1:
@@ -44,58 +43,51 @@ for row in table_body.find_all('tr'):
             buildinglinks[acronym.upper()] = {"url": building_page_url, "name": building_name}
             buildinglinks[building_name.upper()] = {"url": building_page_url, "name": building_name}
 
-#Normalize text for comparison
+# Normalize text for consistent comparison
 def normalize_text(text):
-    
-    #Replace & with and remove commas normalize spaces
+    # Replace "&" with "and", remove commas, and normalize spaces
     normalized = text.replace("&", "and").replace(",", "").strip()
-    
-    #Remove additional spaces
-    normalized = re.sub(r'\s+', ' ', normalized)
+    normalized = re.sub(r'\s+', ' ', normalized)  # Remove extra spaces
     return normalized.upper()
 
-#OCR function
+# OCR function to extract text from an image
 def perform_ocr_on_image(image_path):
-    #Read image using OpenCV
+    # Read the image
     image = cv2.imread(image_path)
-
     if image is None:
         print("Error: Unable to read the image. Please check the file path.")
         return None
 
-    #Convert image to grayscale
-    grayimag = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Convert image to grayscale
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    #Use Tesseract OCR to extract the text
-    extracttext = pytesseract.image_to_string(grayimag)
+    # Use Tesseract OCR to extract text
+    extract_text = pytesseract.image_to_string(gray_image)
 
-    #Remove special characters/numbers
-    filtertext = re.sub(r'[^A-Za-z\s&]', '', extracttext)
+    # Remove special characters and numbers
+    filtered_text = re.sub(r'[^A-Za-z\s&]', '', extract_text)
 
-    return filtertext.strip()
+    return filtered_text.strip()
 
-#Pull up embedded map url from buildings page
+# Get address and map URL from a building's page
 def get_building_info(building_page_url):
-    # Fetch the building's individual page
     response = requests.get(building_page_url)
     building_soup = BeautifulSoup(response.content, 'html.parser')
 
-    #Extract address
+    # Extract the address
     address_tag = building_soup.find('h3', string=lambda t: t and ',' in t)
     if not address_tag:
-        # Fallback: Search for any <h3> tag with text
         address_tag = building_soup.find('h3')
     address = address_tag.get_text(strip=True) if address_tag else "Address not found."
 
-    #Extract embedded map url
+    # Extract the map URL
     iframe_tag = building_soup.find('iframe')
     map_url = iframe_tag['src'] if iframe_tag else "Map not found."
 
     return address, map_url
 
-#Make HTML file for user
+# Generate and open the HTML file
 def generate_html_and_open(building_name, building_acronym, address, map_url):
-    # HTML content
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -123,19 +115,18 @@ def generate_html_and_open(building_name, building_acronym, address, map_url):
     </body>
     </html>
     """
-    #Open file in browser
     with tempfile.NamedTemporaryFile("w", delete=False, suffix=".html") as temp_file:
         temp_file.write(html_content)
         webbrowser.open(f"file://{temp_file.name}")
 
-#Building location and generate HTML
-def get_building_location(filtertext):
-    normalized_input = normalize_text(filtertext)
+# Locate the building and generate HTML
+def get_building_location(filtered_text):
+    normalized_input = normalize_text(filtered_text)
 
-    #Match detected text to building directory
+    # Match detected text to building directory
     for key, building_info in buildinglinks.items():
         normalized_building_name = normalize_text(building_info["name"])
-        if normalized_input == normalized_building_name:
+        if normalized_input == normalized_building_name or normalized_input == key:
             address, map_url = get_building_info(building_info["url"])
             if address != "Address not found." and map_url != "Map not found.":
                 # Output the match before generating HTML
@@ -147,12 +138,12 @@ def get_building_location(filtertext):
 
     print("Building not found. Please check your input.")
 
-#Prompting user
+# Main function
 if __name__ == "__main__":
-    # Prompt the user for the image file location
+    # Prompt the user for the image file path
     image_path = input("Please enter the full path to the image file: ")
 
-    #OCR
+    # Perform OCR
     detected_text = perform_ocr_on_image(image_path)
 
     if detected_text:
